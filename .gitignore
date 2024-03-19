@@ -1,0 +1,7 @@
+*.env
+output.json
+__pycache__
+temp
+storage/*
+uploads/*
+*.csv

@@ -1,0 +1,10 @@
+colorama
+pandas
+influxdb
+influxdb_client
+watchdog
+flask
+flask-cors
+gunicorn
+mysql-connector-python
+python-dotenv
