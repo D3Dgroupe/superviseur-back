@@ -1,10 +1,14 @@
 # app/__init__.py
-import os
 import colorama
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from app.models import setup
 from app.config.application import DevelopmentConfig, ProductionConfig
+
+# On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
+if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
 
 # Initialize colorama (=~ méthode statique).
 colorama.init(autoreset = True)
@@ -14,7 +18,7 @@ def create_app():
     CORS(app)
 
     # Récupère la configuration de développement ou de production selon l'environnement (FLASK_ENV) spécifié.
-    if os.getenv('FLASK_ENV') == 'PRODUCTION': app.config.from_object(ProductionConfig)
+    if os.environ.get('FLASK_ENV') == 'PRODUCTION': app.config.from_object(ProductionConfig)
     else: app.config.from_object(DevelopmentConfig)
 
     # Création des schéma sql.

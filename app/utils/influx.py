@@ -1,5 +1,6 @@
 import time
 import os
+from dotenv import load_dotenv
 import pytz
 
 from datetime import datetime
@@ -9,11 +10,14 @@ from colorama import Fore
 from influxdb_client import InfluxDBClient, Point, WriteOptions
 from influxdb_client.client.write_api import SYNCHRONOUS
 
+# On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
+if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
+
 # Données de configuration d'influx DB (voir docker-compose.yml).
-url = os.getenv('INFLUXDB_HOST', 'http://localhost:8086')
-token = os.getenv('INFLUXDB_TOKEN', 'G3GvhhLo6B99p8ZSVDol7duRfS')
-org = os.getenv('INFLUXDB_ORG', 'd3e')
-bucket = os.getenv('INFLUXDB_BUCKET', 'test')
+url = os.environ.get('INFLUXDB_HOST')
+token = os.environ.get('INFLUXDB_TOKEN')
+org = os.environ.get('INFLUXDB_ORG')
+bucket = os.environ.get('INFLUXDB_BUCKET')
 
 def transmute(data: dict, pool: int, test = False):
     '''

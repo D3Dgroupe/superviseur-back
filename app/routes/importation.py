@@ -1,13 +1,15 @@
-# app/routes/history.py
+# app/routes/importation.py
 import os
 import uuid
 from dotenv import load_dotenv
-
 from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from app.services import historique_service, device_service
 from app.utils.csv_to_json import convert
 from app.utils.influx import transmute
+
+# On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
+if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
 
 importation_bp = Blueprint('importation', __name__, url_prefix = '/imports')
 
@@ -24,7 +26,7 @@ def importer_csv():
     pool = request.form['pool'] or 10_000
 
     # Remonte au dossier racine ./app (ce fichier se trouve dans ./app/routes)
-    destination = os.path.join(os.getenv('UPLOAD_FOLDER', 'app/uploads'), file.filename)
+    destination = os.path.join(os.environ.get('UPLOAD_FOLDER'), file.filename)
 
     # Si l'extension n'est pas un fichier csv (on peut aussi se baser sur le header pour plus de sécurité).
     if str.lower(extension) != '.csv': return jsonify({'message': 'Format de fichier non pris en charge.'}), 400

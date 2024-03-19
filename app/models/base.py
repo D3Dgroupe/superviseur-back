@@ -1,17 +1,17 @@
-import os
 import mysql.connector
+import os
+from dotenv import load_dotenv
 from colorama import Fore
 
-'''
-    On ne devrait plus y toucher une fois en place.
-'''
+# On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
+if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
 
 class Database:
     '''Fourni un accès MySQL.'''
     def __init__(self):
         """Gestion i/o de la base de données."""
 
-        self.mysql_params = {'host': os.getenv('MYSQL_HOST', 'localhost'), 'user': os.getenv('MYSQL_USERNAME', 'root'), 'passwd': os.getenv('MYSQL_PASSWORD', '.Logme1nn'), 'port': os.getenv('MYSQL_PORT', 3306), 'database': os.getenv('MYSQL_DATABASE', 'test'), 'autocommit': True}
+        self.mysql_params = {'host': os.environ.get('MYSQL_HOST'), 'user': os.environ.get('MYSQL_USERNAME'), 'passwd': os.environ.get('MYSQL_PASSWORD'), 'port': os.environ.get('MYSQL_PORT'), 'database': os.environ.get('MYSQL_DATABASE'), 'autocommit': True}
 
         try:
             self._conn = mysql.connector.connect(**self.mysql_params)

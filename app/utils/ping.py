@@ -1,9 +1,13 @@
-import os
 import time
 import requests
+import os
+from dotenv import load_dotenv
 from smtplib import SMTP_SSL as SMTP
 from email.mime.text import MIMEText
 from colorama import Fore
+
+# On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
+if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
 
 def mailing(e: str, url: str):
     '''
@@ -14,12 +18,12 @@ def mailing(e: str, url: str):
 
     try:
         # Variables extraites depuis l'environnement.
-        sender = os.getenv('SENDER')
-        receiver = os.getenv('RECEIVER')
+        sender = os.environ.get('SENDER')
+        receiver = os.environ.get('RECEIVER')
 
-        smtp_host = os.getenv('SMTP_SERVER')
-        smtp_username = os.getenv('SMTP_USERNAME')
-        smtp_password = os.getenv('SMTP_PASSWORD')
+        smtp_host = os.environ.get('SMTP_SERVER')
+        smtp_username = os.environ.get('SMTP_USERNAME')
+        smtp_password = os.environ.get('SMTP_PASSWORD')
         
         # Paramètres.
         message = MIMEText(f"On dirait qu'un des services a pété une durite, voyez par vous même les informations complémentaires ci-dessous : \n {e}", "plain")
@@ -43,8 +47,9 @@ def ping_service():
         Permet de ping les deux services.\n
         Exécuté uniquement lors d'une mise en production.
     '''
-    influx = os.getenv('INFLUXDB_HOST', 'http://localhost:8086')
-    grafana = os.getenv('GRAFANA_HOST', 'http://localhost:3000')
+    
+    influx = os.environ.get('INFLUXDB_HOST')
+    grafana = os.environ.get('GRAFANA_HOST')
 
     try:
         # Exécute la requête.
