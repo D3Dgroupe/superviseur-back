@@ -15,6 +15,8 @@ app = create_app()
 
 # La fonction (callback) déclenchée par le watch dog (reste à compléter la logique).
 def on_new_file_created(file_path):
+
+    if file_path is None: return
     
     # Vérifie s'il s'agit bien d'un fichier csv.
     extension = str(os.path.splitext(file_path)[1])
