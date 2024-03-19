@@ -15,6 +15,11 @@ app = create_app()
 
 # La fonction (callback) déclenchée par le watch dog (reste à compléter la logique).
 def on_new_file_created(file_path):
+    
+    # Vérifie s'il s'agit bien d'un fichier csv.
+    extension = str(os.path.splitext(file_path)[1])
+    if extension.upper() != 'CSV': return
+
     print(Fore.YELLOW + f"Un nouveau csv vient de pop dans le dossier à l'adresse : {file_path}.")
 
     # Appelle la procédure afin de convertir le csv en json (dictionnaire).
