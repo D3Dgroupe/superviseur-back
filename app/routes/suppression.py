@@ -45,7 +45,7 @@ def purger_mesure_jour():
     new_data.update({'days': days})
 
     # On souhaite purger les mesures au jour.
-    purge_days(days, data['device'])
+    purge_days(days, data['capteur'])
 
     # Renvoie le dictionnaire original et un statut succès (200).
     return jsonify('Les points ont été supprimés.'), 200
@@ -76,7 +76,7 @@ def purger_mesure_mois():
     new_data.update({'months': months})
 
     # On souhaite purger les mesures au mois.
-    purge_months(months, data['device'])
+    purge_months(months, data['capteur'])
 
     # Retourne le nouveau dictionnaire et le statut code (OK).
     return jsonify('Les points ont été supprimés.'), 200
