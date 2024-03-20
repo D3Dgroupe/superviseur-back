@@ -51,6 +51,9 @@ def ping_service():
     influx = os.environ.get('INFLUXDB_HOST')
     grafana = os.environ.get('GRAFANA_HOST')
 
+    print(Fore.CYAN + f'Ping vers le service {influx}.')
+    print(Fore.CYAN + f'Ping vers le service {grafana}.')
+
     try:
         # Exécute la requête.
         response = requests.get(influx)
