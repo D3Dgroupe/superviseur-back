@@ -1,5 +1,6 @@
 # app/utils/file_watcher.py
 import time
+import os
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from colorama import Fore
@@ -37,3 +38,23 @@ def start_watching(path, on_created_callback, seconds = 10):
     
     # Permet de joindre thread (comme pour asyncio) et attend la fermeture de celui-ci.
     observer.join()
+
+def start_watching_windows(folder_path, callback_function, scan_interval):
+    # On initialise le set avec les fichiers qui ont déjà été traités dans le répertoire (en cas de crash par exemple).
+    last_files = set(os.listdir(folder_path))
+
+    while True:
+        # Récupère les fichiers déjà présents.
+        current_files = set(os.listdir(folder_path))
+        
+        # Fait la comparaison avec les derniers fichiers.
+        new_files = current_files - last_files
+
+        # Pour chaque nouveau fichier on bascule vers le callback pour import.
+        for filename in new_files: callback_function(f'{folder_path}/{filename}')
+
+        # Met à jour la liste des derniers fichiers.
+        last_files = current_files.copy()
+
+        # Délai avant prochain tour de boucle.
+        time.sleep(scan_interval)
