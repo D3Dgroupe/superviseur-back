@@ -47,6 +47,7 @@ def transmute(data: dict, pool: int, test = False):
             name_displayed = record["nameDisplayed"]
             threshold = record["threshold"]
             unit = record["unit"]
+            previsionnel = record["previsionnel"]
 
             # Groupes d'appartenance.
             group_a = record["deviceGroup"]
@@ -62,7 +63,7 @@ def transmute(data: dict, pool: int, test = False):
 
                 point.tag("name_displayed", name_displayed)
                 point.tag("name_gtc", device)
-
+                point.tag("previsionnel", previsionnel)
                 # Le seuil si applicable.
                 if threshold is not None: point.field("threshold", threshold)
                 
@@ -112,6 +113,7 @@ def write(device: dict, points: dict, pool: int):
 
             point.tag("name_displayed", device['nameDisplayed'])
             point.tag("name_gtc", device['nameGtc'])
+            point.tag("previsionnel", device['previsionnel'])
 
             # Le seuil si applicable.
             if device['threshold'] is not None: point.field("threshold", device['threshold'])

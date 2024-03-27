@@ -50,6 +50,8 @@ def on_new_file_created(file_path):
         eq.update({"tag": eq_full['tag']})
         eq.update({"nameGtc": eq_full['nameGtc']})
         eq.update({"nameDisplayed": eq_full['nameDisplayed']})
+        eq.update({"unit": eq_full['unit']})
+        eq.update({"previsionnel": eq_full['previsionnel']})
         eq.update({"threshold": eq_full['threshold']})
 
         # Les groupes.

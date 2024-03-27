@@ -9,7 +9,7 @@ def recuperer_appareils():
         Récupère les informations des appareils enregistrés.
     '''
     # Appel à la base de données dans le but de requêter les appareils (le mot clé `with` permet d'ouvrir et de fermer le curseur automatiquement).
-    with Database() as db: appareils = db.find_all(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, digital, rate, threshold, comment, created from devices order by created desc')
+    with Database() as db: appareils = db.find_all(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, previsionnel, digital, rate, threshold, comment, created from devices order by created desc')
 
     # Renvoyer le dictionnaire.
     return appareils
@@ -19,7 +19,7 @@ def recuperer_appareil(id: int):
         Récupère un appareil.
     '''
     # Appel à la base de données dans le but de requêter les appareils (le mot clé `with` permet d'ouvrir et de fermer le curseur automatiquement).
-    with Database() as db: appareil = db.find_one(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, digital, rate, threshold, comment, created from devices where id = {id} order by nameGtc')
+    with Database() as db: appareil = db.find_one(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, previsionnel, digital, rate, threshold, comment, created from devices where id = {id} order by nameGtc')
 
     # Renvoyer le dictionnaire.
     return appareil
@@ -33,7 +33,7 @@ def recuperer_appareil_par_nom(tag: str):
 
         # Requête préparée.
         query = '''
-            SELECT id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, digital, rate, threshold, comment, created
+            SELECT id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, previsionnel, unit, digital, rate, threshold, comment, created
             FROM devices
             WHERE tag = UPPER(%s)
         '''
@@ -67,12 +67,12 @@ def ajouter_appareil(device):
     with Database() as db:
         # Requête paramétrée.
         query = '''
-            INSERT INTO devices (tag, nameGtc, nameDisplayed, deviceGroup, unit, digital, rate, threshold, comment, created)
+            INSERT INTO devices (tag, nameGtc, nameDisplayed, deviceGroup, unit, previsionnel, digital, rate, threshold, comment, created)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())
         '''
 
         # Exécute la requête.
-        db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['digital'], device['rate'], device['threshold'], device['comment']))
+        db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['previsionnel'], device['digital'], device['rate'], device['threshold'], device['comment']))
 
 def modifier_appareil(id: int, device):
     '''
@@ -82,12 +82,12 @@ def modifier_appareil(id: int, device):
         # Requête paramétrée.
         query = '''
             UPDATE devices
-            SET tag = %s, nameGtc = %s, nameDisplayed = %s, deviceGroup = %s, unit = %s, digital = %s, rate = %s, threshold = %s, comment = %s
+            SET tag = %s, nameGtc = %s, nameDisplayed = %s, deviceGroup = %s, unit = %s, previsionnel = %s, digital = %s, rate = %s, threshold = %s, comment = %s
             WHERE id = %s
         '''
 
         # Exécute la requête.
-        db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['digital'], device['rate'], device['threshold'], device['comment'], id))
+        db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['previsionnel'], device['digital'], device['rate'], device['threshold'], device['comment'], id))
 
 def recuperer_appareils_par_saisie(input: str):
     '''
