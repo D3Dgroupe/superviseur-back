@@ -7,11 +7,12 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from app.models import setup
-from app.services import device_service as ds
+from app.routes import register_routes
 from app.config.application import DevelopmentConfig, ProductionConfig
+from app.services import device_service as ds
 from app.utils.csv_to_json import convert
 from app.utils.influx import transmute
-from app.utils.file_watcher import start_watching, start_watching_windows
+from app.utils.file_watcher import start_watching_linux, start_watching_windows
 from app.utils.ping import run_periodic_pings
 
 # On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
@@ -41,7 +42,7 @@ def on_new_file_created(file_path):
     # On parcours les équipements du csv et on vérifie leur présence dans la base de données pour en extraire les infos.
     for eq in data['equipements']:
         # Récupère les informations au complet de l'appareil.
-        eq_full = ds.recuperer_appareil_par_nom(eq['tag'])
+        eq_full = ds.recuperer_appareil_par_tag(eq['tag'])
         
         # On ne mettra pas à jour le dictionnaire si le tag du csv n'existe pas en base de données.
         if eq_full is None: continue
@@ -71,24 +72,25 @@ def create_app():
         Point de démarrage en mode production (c'est le script qui gère).
     '''
     app = Flask(__name__)
+    
+    # Nécessaire pour la gestion du partage de ressources d'origine croisée (ex : communication du front vers le back).
     CORS(app)
 
     # Récupère la configuration de développement ou de production selon l'environnement (FLASK_ENV) spécifié.
     if os.environ.get('FLASK_ENV').upper() == 'PRODUCTION': app.config.from_object(ProductionConfig)
     else: app.config.from_object(DevelopmentConfig)
 
+    # Le répertoire à surveiller, la fonction callback et l'interval entre chaque heart beat.
+    args_surveillance = (app.config['LISTEN_FOLDER_PATH'], on_new_file_created, app.config['WATCHDOG_SLEEP_INTERVAL'])
+
     # Créer les répertoires critiques de fonctionnement s'ils n'existent pas.
-    if not os.path.exists(app.config['CSV_FOLDER_PATH']): os.makedirs(app.config['CSV_FOLDER_PATH'])
+    if not os.path.exists(app.config['LISTEN_FOLDER_PATH']): os.makedirs(app.config['LISTEN_FOLDER_PATH'])
     if not os.path.exists(app.config['UPLOADS_PATH']): os.makedirs(app.config['UPLOADS_PATH'])
 
     print(Fore.YELLOW + "Lancement des Threads.")
 
-    # Le watchdog est compatible uniquement en mode développement dans un environnement Windows.
-    if os.environ.get('HOST_OS') == 'LINUX': watcher_thread = Thread(target = start_watching, args = (app.config['CSV_FOLDER_PATH'], on_new_file_created, app.config['WATCHDOG_SLEEP_INTERVAL']), daemon = True)
-    
-    # Utilise l'alternative pour un environnement Windows
-    if os.environ.get('HOST_OS') == 'WINDOWS': watcher_thread = Thread(target = start_watching_windows, args = (app.config['CSV_FOLDER_PATH'], on_new_file_created, app.config['WATCHDOG_SLEEP_INTERVAL']), daemon = True)
-    
+    # Création de deux threads (daemon non bloquant lors de la fermeture).
+    watcher_thread = Thread(target = (start_watching_windows if os.environ.get('HOST_OS') == 'WINDOWS' else start_watching_linux), args = args_surveillance, daemon = True)
     ping_thread = Thread(target = run_periodic_pings, args = (3600, app.config['FLASK_ENV']), daemon = True)
     
     # Démarre les threads.
@@ -99,24 +101,7 @@ def create_app():
     setup()
     
     # Importation des routes.
-    from .routes.history import history_bp
-    from .routes.importation import importation_bp
-    from .routes.devices import devices_bp
-    from .routes.inputs import inputs_bp
-    from .routes.suppression import suppression_bp
-
-    # Importer d'autres routes ici.
-    # ...
-    
-    # Enregistre les routes spécifiques au serveur.
-    app.register_blueprint(history_bp)
-    app.register_blueprint(importation_bp)
-    app.register_blueprint(devices_bp)
-    app.register_blueprint(inputs_bp)
-    app.register_blueprint(suppression_bp)
-
-    # Enregistrer d'autres routes ici.
-    # ...
+    register_routes(app)
 
     # Import intercepteur d'erreur (404).
     from .exceptions.errors import not_found_error, internal_error

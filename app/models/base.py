@@ -7,18 +7,21 @@ from colorama import Fore
 if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
 
 class Database:
+    _conn = None
+    
     '''Fourni un accès MySQL.'''
     def __init__(self):
         """Gestion i/o de la base de données."""
 
         self.mysql_params = {'host': os.environ.get('MYSQL_HOST'), 'user': os.environ.get('MYSQL_USERNAME'), 'passwd': os.environ.get('MYSQL_PASSWORD'), 'port': os.environ.get('MYSQL_PORT'), 'database': os.environ.get('MYSQL_DATABASE'), 'autocommit': True}
 
-        try:
-            self._conn = mysql.connector.connect(**self.mysql_params)
-            self._cursor = self._conn.cursor(dictionary = True, buffered = True)
-            print(Fore.LIGHTGREEN_EX + "Connexion avec la base de données opérationnelle.")
-        except Exception as e:
-            exit(Fore.RED + f"Le projet a besoin d'une connexion à MySQL pour être opérationnel : {e}")
+        if self._conn is None:
+            try:
+                self._conn = mysql.connector.connect(**self.mysql_params)
+                self._cursor = self._conn.cursor(dictionary = True, buffered = True)
+                print(Fore.YELLOW + "Connexion établie avec la base de données MySQL.")
+            except Exception as e:
+                exit(Fore.RED + f"Le projet a besoin d'une connexion à MySQL pour être opérationnel : {e}")
 
     def __enter__(self):
         return self

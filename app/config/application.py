@@ -14,8 +14,8 @@ class DevelopmentConfig(Config):
     FLASK_ENV = 'DEVELOPMENT'
     DEBUG = True
     
-    # Si dans le fichier d'environnement (.env) la variable `CSV_FOLDER_PATH` n'existe pas alors on prend `app/storage` par défaut.
-    CSV_FOLDER_PATH = 'app/storage'
+    # Si dans le fichier d'environnement (.env) la variable `LISTEN_FOLDER_PATH` n'existe pas alors on prend `app/storage` par défaut.
+    LISTEN_FOLDER_PATH = 'app/storage'
 
 class ProductionConfig(Config):
     # Par héritage, les variables WATCHDOG_SLEEP_INTERVAL et UPLOADS_PATH sont également comprises.
@@ -23,4 +23,4 @@ class ProductionConfig(Config):
     DEBUG = False
     
     # Si la variable d'environnement `LISTEN_FOLDER_PATH` n'existe pas, utilise celle par défaut.
-    CSV_FOLDER_PATH = os.environ.get('LISTEN_FOLDER_PATH')
+    LISTEN_FOLDER_PATH = os.environ.get('LISTEN_FOLDER_PATH')

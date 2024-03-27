@@ -20,7 +20,7 @@ class WatchdogEventHandler(FileSystemEventHandler):
         # Vérifie que l'événement concerne un fichier.
         if not event.is_directory: self.on_created_callback(event.src_path)
 
-def start_watching(path, on_created_callback, seconds = 10):
+def start_watching_linux(path, on_created_callback, seconds = 10):
     # Démarre le gestionnaire.
     event_handler = WatchdogEventHandler(on_created_callback = on_created_callback)
     
