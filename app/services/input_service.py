@@ -1,6 +1,6 @@
 # app/services/input_service.py
 from datetime import datetime
-from zoneinfo import ZoneInfo
+import pytz
 from app.utils.influx import write, purge_months, purge_days
 from app.utils import dateutils
 
@@ -32,7 +32,7 @@ class InputService():
             if data['option'] == 0:
                 # Ajout des mesures pour chaque jour du mois via une liste de compréhension (plus rapide).
                 measurements += [{
-                    'time': datetime(year, month, day).strftime("%Y-%m-%dT00:00:00Z"),
+                    'time': datetime(year, month, day).replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     'value': (value / nb_jours)
                 } for day in range(1, nb_jours)]
 
@@ -40,24 +40,29 @@ class InputService():
             if data['option'] == 1:
                 # Ajout des mesures pour chaque jour du mois via une liste de compréhension (plus rapide).
                 measurements += [{
-                    'time': datetime(year, month, day).strftime("%Y-%m-%dT00:00:00Z"),
+                    'time': datetime(year, month, day).replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                     'value': value
                 } for day in range(1, nb_jours)]
             
             # Option Premier du mois.
             if data['option'] == 2:
                 # Construction de la mesure et de sa valeur au premier du mois.
-                formatted_datetime = datetime(year, month, 1).strftime("%Y-%m-%dT00:00:00Z")
-            
+                formatted_datetime = datetime(year, month, 1).replace(hour = 00, minute = 00, second = 00).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             # Option Dernier du mois.
             if data['option'] == 3:
                 # Construction de la mesure et de sa valeur à la fin du mois.
+                # Date initiale au format timezone
                 last_day = dateutils.dernier_jour_du_mois(month, year)
-                formatted_datetime = last_day.strftime("%Y-%m-%dT00:00:00Z")
-            
+                last_day_utc = last_day.replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc)
+                formatted_datetime = last_day_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+
             # Utilisé pour la purge.
             last_day = dateutils.dernier_jour_du_mois(month, year)
-            mois_a_clean.append({'start': datetime(year, month, 1).strftime("%Y-%m-%dT00:00:00Z"), 'end': last_day.strftime("%Y-%m-%dT00:00:00Z")})
+            last_day_utc = last_day.replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc)
+            formatted_datetime_last_day = last_day_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+            formatted_datetime_first_day = datetime(year, month, 1).replace(hour = 00, minute = 00, second = 00).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            mois_a_clean.append({'start': formatted_datetime_first_day, 'end': formatted_datetime_last_day})
             
             # Ajout des mesures pour les options 2 et 3 (car soit le premier ou dernier du mois).
             if data['option'] > 1: measurements.append({ 'time': formatted_datetime, 'value': value })
@@ -82,14 +87,15 @@ class InputService():
             # Si l'un des trois paramètres n'est pas renseigné.
             if None in (date, value): continue
 
-            paris_timezone = ZoneInfo("Europe/Paris")
-            local_datetime = datetime.strptime(f'{date}', "%Y-%m-%d").replace(tzinfo = paris_timezone)
-
+            # On converti la date récupérée en format Datetime pour pouvoir la réutiliser après
+            variable_date = datetime.strptime(date, "%Y-%m-%d")
             # Début de journée sinon fin de journée.
-            datetime_str = local_datetime.strftime("%Y-%m-%dT00:00:00Z" if data['option'] == 0 else "%Y-%m-%dT23:59:00Z")
+            datetime_str_debut = variable_date.replace(hour = 00, minute = 00, second = 00).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            datetime_str_fin = variable_date.replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            datetime_str = datetime_str_debut if data['option'] == 0 else datetime_str_fin
 
             # Ajoute dans les mesures une nouvelle entrée.
-            days_a_clean.append({'start': local_datetime.strftime("%Y-%m-%dT00:00:00Z"), 'end': local_datetime.strftime("%Y-%m-%dT23:59:00Z")})
+            days_a_clean.append({'start': datetime_str_debut, 'end': datetime_str_fin})
             
             # Ajoute dans les mesures une nouvelle entrée.
             measurements.append({ 'time': datetime_str, 'value': value })
@@ -116,11 +122,10 @@ class InputService():
 
             # Si l'un des trois paramètres n'est pas renseigné.
             if None in (date, time, value): continue
-
-            paris_timezone = ZoneInfo("Europe/Paris")
-            local_datetime = datetime.strptime(f'{time} {date}', "%H:%M %Y-%m-%d").replace(tzinfo = paris_timezone)
-
-            datetime_str = local_datetime.strftime("%Y-%m-%dT%H:%M:00Z")
+            # On converti la date récupérée en format Datetime pour pouvoir la réutiliser après
+            variable_date = datetime.strptime(date, "%Y-%m-%d")
+            variable_time = datetime.strptime(time, "%H:%M")
+            datetime_str = variable_date.replace(hour = variable_time.hour, minute = variable_time.minute, second = 00).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             
             # Ajoute dans les mesures une nouvelle entrée.
             measurements.append({ 'time': datetime_str, 'value': value })

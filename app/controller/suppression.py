@@ -33,7 +33,7 @@ def purger_mesure_jour():
 def purger_mesure_mois():
     # Les données reçues à formatter.
     data = request.get_json()
-
+ 
     deleted = service.purge_months(data)
 
     # Retourne le nouveau dictionnaire et le statut code (OK).
