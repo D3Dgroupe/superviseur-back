@@ -68,7 +68,7 @@ def ajouter_appareil(device):
         # Requête paramétrée.
         query = '''
             INSERT INTO devices (tag, nameGtc, nameDisplayed, deviceGroup, unit, previsionnel, digital, rate, threshold, comment, created)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
         '''
 
         # Exécute la requête.
