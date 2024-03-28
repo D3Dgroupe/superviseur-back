@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify
 from flask_cors import cross_origin
 from app.services.import_service import ImportService
 
-imports_bp = Blueprint('imports', __name__, url_prefix = '/history')
+imports_bp = Blueprint('imports', __name__, url_prefix = '/imports')
 service = ImportService()
 
 @imports_bp.route('/', methods = ['GET'])
