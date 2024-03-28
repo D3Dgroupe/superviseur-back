@@ -11,15 +11,16 @@ class PurgeService():
         Ce service ne fait appel à aucun dao dans cette version.
     '''
     def __init__(self):
-        print("Service de purge initialisé.")
+        print("Initialisation de `Purge` Service.")
 
-    def purge_all_by_tag(tag: str):
-        purge(tag)
+    def purge_all_by_tag(self, tag: str):
+        return purge(tag)
     
-    def purge_days(data: dict):
+    def purge_days(self, data: dict):
         # Les valeurs formattées.
         days = []
         
+        # Traitement des données pour compatibilité Influx.
         for item in data['datablocs']:
             # Vérifie que la clé existe.
             date = item.get("date")
@@ -39,12 +40,13 @@ class PurgeService():
         new_data.update({'days': days})
 
         # On souhaite purger les mesures au jour.
-        purge_days(days, data['capteur'])
+        return purge_days(days, data['capteur'])
 
-    def purge_months(data: dict):
+    def purge_months(self, data: dict):
         # Les valeurs formattées.
         months = []
 
+        # Traitement des données pour compatibilité Influx.
         for item in data['datablocs']:
             # Non bloquant si la clé n'existe pas.
             month, year, = item.get("month"), item.get("year")
@@ -62,4 +64,4 @@ class PurgeService():
         new_data.update({'months': months})
 
         # On souhaite purger les mesures au mois.
-        purge_months(months, data['capteur'])
+        return purge_months(months, data['capteur'])

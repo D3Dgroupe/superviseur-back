@@ -11,9 +11,9 @@ class InputService():
         Ce service ne fait appel à aucun dao dans cette version.
     '''
     def __init__(self):
-        print("Service d'inputs initialisé.")
+        print("Initialisation de `Input` Service.")
 
-    def ajouter_donnees_mois(data: dict):
+    def ajouter_donnees_mois(self, data: dict):
         # Les valeurs formattées.
         measurements = []
         mois_a_clean = []
@@ -70,7 +70,7 @@ class InputService():
 
         return measurements
 
-    def ajouter_donnees_jour(data: dict):
+    def ajouter_donnees_jour(self, data: dict):
         # Les valeurs formattées.
         measurements = []
         days_a_clean = []
@@ -106,7 +106,7 @@ class InputService():
 
         return new_data
     
-    def ajouter_donnees_heure(data: dict):
+    def ajouter_donnees_heure(self, data: dict):
         # Les valeurs formattées.
         measurements = []
         
