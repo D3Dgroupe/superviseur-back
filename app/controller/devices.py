@@ -58,6 +58,7 @@ def ajouter_device():
         'nameDisplayed': capteur.get('nameDisplayed'),
         'deviceGroup': capteur.get('deviceGroup'),
         'unit': capteur.get('unit', None),
+        'previsionnel': capteur.get('previsionnel', None),
         'digital': capteur.get('digital', None),
         'rate': capteur.get('rate', None),
         'threshold': capteur.get('threshold', None),

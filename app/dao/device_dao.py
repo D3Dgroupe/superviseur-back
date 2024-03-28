@@ -13,7 +13,7 @@ class DeviceDao():
         '''
         with Database() as db:
             # Appel à la base de données dans le but de requêter les appareils (le mot clé `with` permet d'ouvrir et de fermer le curseur automatiquement).
-            appareils = db.find_all(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, digital, rate, threshold, comment, created from devices order by created desc')
+            appareils = db.find_all(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, previsionnel, digital, rate, threshold, comment, created from devices order by created desc')
 
             # Renvoyer le dictionnaire.
             return appareils
@@ -27,7 +27,7 @@ class DeviceDao():
         with Database() as db:
             # Requête préparée.
             query = '''
-                SELECT id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, digital, rate, threshold, comment, created
+                SELECT id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, previsionnel, digital, rate, threshold, comment, created
                 FROM devices
                 WHERE tag = UPPER(%s)
             '''
@@ -45,12 +45,12 @@ class DeviceDao():
         with Database() as db:
             # Requête paramétrée.
             query = '''
-                INSERT INTO devices (tag, nameGtc, nameDisplayed, deviceGroup, unit, digital, rate, threshold, comment, created)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, now())
+                INSERT INTO devices (tag, nameGtc, nameDisplayed, deviceGroup, unit, previsionnel, digital, rate, threshold, comment, created)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, now())
             '''
 
             # Exécute la requête.
-            db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['digital'], device['rate'], device['threshold'], device['comment']))
+            db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['previsionnel'], device['digital'], device['rate'], device['threshold'], device['comment']))
 
     def save(self, id: int, device: dict):
         '''
@@ -60,12 +60,12 @@ class DeviceDao():
             # Requête paramétrée.
             query = '''
                 UPDATE devices
-                SET tag = %s, nameGtc = %s, nameDisplayed = %s, deviceGroup = %s, unit = %s, digital = %s, rate = %s, threshold = %s, comment = %s
+                SET tag = %s, nameGtc = %s, nameDisplayed = %s, deviceGroup = %s, unit = %s, previsionnel = %s, digital = %s, rate = %s, threshold = %s, comment = %s
                 WHERE id = %s
             '''
 
             # Exécute la requête.
-            db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['digital'], device['rate'], device['threshold'], device['comment'], id))
+            db.execute(query, (device['tag'], device['nameGtc'], device['nameDisplayed'], device['deviceGroup'], device['unit'], device['previsionnel'], device['digital'], device['rate'], device['threshold'], device['comment'], id))
 
     def save_all(self, devices: list):
         '''
@@ -89,7 +89,7 @@ class DeviceDao():
         '''
         # Appel à la base de données dans le but de requêter les appareils (le mot clé `with` permet d'ouvrir et de fermer le curseur automatiquement).
         with Database() as db:
-            appareil = db.find_one(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, digital, rate, threshold, comment, created from devices where id = {id} order by nameGtc')
+            appareil = db.find_one(f'select id, tag, nameGtc, nameDisplayed, tag, deviceGroup, location, unit, previsionnel, digital, rate, threshold, comment, created from devices where id = {id} order by nameGtc')
 
         # Renvoyer le dictionnaire.
         return appareil
