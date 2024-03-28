@@ -7,7 +7,7 @@ app = create_app()
 if __name__ == '__main__':
     '''
         Point de démarrage en environnement de développement.
-        Test 3.
+        Test 5-Recent.
     '''
 
     # Attention : Bloquant (ne rien exécuter après cette ligne).
