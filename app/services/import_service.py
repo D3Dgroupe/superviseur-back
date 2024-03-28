@@ -12,6 +12,7 @@ class ImportService():
         Service de gestion des imports.
     '''
     def __init__(self):
+        print("Initialisation de `Import` Service.")
         self.import_dao = ImportDao()
         self.device_dao = DeviceDao()
         
@@ -41,6 +42,8 @@ class ImportService():
         # On parcours les équipements du csv et on vérifie leur présence dans la base de données pour en extraire les infos.
         for eq in data['equipements']:
             # Récupère les informations au complet de l'appareil.
+            # TODO : Pas vraiment un todo mais il faut savoir qu'on ouvre et ferme la connexion à chaque fois dans notre boucle.
+            # En principe ce n'est pas un problème au vu de notre utilisation, mais c'est une piste d'amélioration pour l'avenir.
             eq_full = self.device_dao.find_by_tag(eq['tag'])
             
             # On ne mettra pas à jour le dictionnaire si le tag du csv n'existe pas en base de données.

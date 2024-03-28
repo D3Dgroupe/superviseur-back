@@ -38,7 +38,7 @@ class DeviceDao():
             # Renvoyer le dictionnaire.
             return db.fetchone()
         
-    def save(self, device: dict):
+    def create(self, device: dict):
         '''
             Ajoute (sauvegarde) un nouvel appareil.
         '''

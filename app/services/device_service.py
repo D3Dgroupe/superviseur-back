@@ -6,6 +6,7 @@ class DeviceService():
         Service de gestion des capteurs.
     '''
     def __init__(self):
+        print("Initialisation de `Device` Service.")
         self.device_dao = DeviceDao()
 
     def recuperer_appareils(self):
@@ -37,7 +38,7 @@ class DeviceService():
         '''
             Ajoute (sauvegarde) un nouvel appareil.
         '''
-        self.device_dao.save(device)
+        self.device_dao.create(device)
 
     def modifier_appareil(self, id: int, device):
         '''
