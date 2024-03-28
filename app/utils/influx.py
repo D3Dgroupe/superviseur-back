@@ -64,6 +64,7 @@ def transmute(data: dict, pool: int, test = False):
                 point.tag("name_displayed", name_displayed)
                 point.tag("name_gtc", device)
                 point.tag("previsionnel", previsionnel)
+
                 # Le seuil si applicable.
                 if threshold is not None: point.field("threshold", threshold)
                 
@@ -143,7 +144,10 @@ def purge(tag: str):
     start = ten_years_ago.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     stop = now.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
+    try: delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
+    except: print(Fore.RED + f"La suppression des mesures du capteur avec pour tag {tag} n'a pu avoir lieu sur le bucket {bucket}."); return False
+
+    return True
 
 def purge_days(days: list, device: dict):
     # Initialisation du client InfluxDB.
@@ -159,7 +163,10 @@ def purge_days(days: list, device: dict):
         # Le tag de l'appareil.
         tag = device['tag']
 
-        delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
+        try: delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
+        except: print(Fore.RED + f"La suppression au jour des mesures du capteur avec pour tag {tag} n'a pu avoir lieu sur le bucket {bucket}."); return False
+
+    return True
 
 def purge_months(months: list, device: dict):
     # Initialisation du client InfluxDB.
@@ -175,4 +182,7 @@ def purge_months(months: list, device: dict):
         # Le tag de l'appareil.
         tag = device['tag']
 
-        delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
+        try: delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
+        except: print(Fore.RED + f"La suppression au mois des mesures du capteur avec pour tag {tag} n'a pu avoir lieu sur le bucket {bucket}."); return False
+
+    return True
