@@ -139,10 +139,11 @@ def purge(tag: str):
 
     now = datetime.now()
     ten_years_ago = now - relativedelta(years = 10)
+    ten_years_after = now + relativedelta(years = 10)
     
     # Conversion en UTC.
     start = ten_years_ago.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    stop = now.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    stop = ten_years_after.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     try: delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
     except: print(Fore.RED + f"La suppression des mesures du capteur avec pour tag {tag} n'a pu avoir lieu sur le bucket {bucket}."); return False
