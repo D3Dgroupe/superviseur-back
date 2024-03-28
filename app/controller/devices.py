@@ -74,7 +74,7 @@ def ajouter_device():
     if not capteur or 'tag' not in capteur: return jsonify(capteur), 400
 
     # Vérifie que le nom n'est pas déjà utilisé par un autre capteur existant.
-    capteurExistant = service.recuperer_appareil_par_tag(capteur['tag'])
+    capteurExistant = service.recuperer_appareil_par_tag(capteur_propre['tag'])
 
     # Si le capteur existe déjà.
     if capteurExistant: return jsonify(f"Ce tag est déjà utilisé par le capteur `{capteurExistant['nameGtc']}`."), 400
@@ -103,10 +103,11 @@ def modifier_device(id: int):
 @cross_origin()
 def supprimer_device(id: int, tag: str):
     # Tente d'abord de supprimer tous les points dans influx avant de le supprimer de mysql.
-    purge(tag)
+    deleted = purge(tag)
     
-    # Supprime l'appareil.
-    service.supprimer_appareil(id)
+    # Supprime l'appareil de MySQL si les mesures ont été supprimées au préalable.
+    if deleted: service.supprimer_appareil(id)
 
     # Renvoie un statut code (créé) et le capteur ajouté.
-    return jsonify('Appareil supprimé avec succès.'), 200
+    if deleted: return jsonify('Appareil supprimé avec succès.'), 200
+    else: return jsonify('Une erreur est survenue lors de la suppression des mesures.'), 400
