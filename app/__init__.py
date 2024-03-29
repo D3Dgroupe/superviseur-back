@@ -9,11 +9,13 @@ from flask_cors import CORS
 from app.models import setup
 from app.routes import register_routes
 from app.config.application import DevelopmentConfig, ProductionConfig
-from app.services import device_service as ds
+from app.services.device_service import *
 from app.utils.csv_to_json import convert
 from app.utils.influx import transmute
 from app.utils.file_watcher import start_watching_linux, start_watching_windows
 from app.utils.ping import run_periodic_pings
+
+service = DeviceService()
 
 # On appelle load_dotenv() pour les venv locales en mode développement, autrement celles du docker compose.
 if os.environ.get('FLASK_ENV', 'DEVELOPMENT') == 'DEVELOPMENT': load_dotenv()
@@ -35,14 +37,18 @@ def on_new_file_created(file_path):
 
     # Appelle la procédure afin de convertir le csv en json (dictionnaire).
     data = convert(file_path)
+    # Test si data contient des données, sinon on arrête
+    if data == None: return None
 
     # Les équipements dont on va pull les infos depuis MySQL.
     equipments = []
 
+    
     # On parcours les équipements du csv et on vérifie leur présence dans la base de données pour en extraire les infos.
     for eq in data['equipements']:
+
         # Récupère les informations au complet de l'appareil.
-        eq_full = ds.recuperer_appareil_par_tag(eq['tag'])
+        eq_full = service.recuperer_appareil_par_tag(eq['tag'])
         
         # On ne mettra pas à jour le dictionnaire si le tag du csv n'existe pas en base de données.
         if eq_full is None: continue
@@ -54,6 +60,7 @@ def on_new_file_created(file_path):
         eq.update({"unit": eq_full['unit']})
         eq.update({"previsionnel": eq_full['previsionnel']})
         eq.update({"threshold": eq_full['threshold']})
+        eq.update({"field_value_type": eq_full['field_value_type']})
 
         # Les groupes.
         eq.update({"deviceGroup": eq_full['deviceGroup']})
