@@ -20,6 +20,7 @@ class Device():
         `deviceGroup_c` varchar(255) DEFAULT NULL COMMENT "Troisième groupe d'appartenance pour cet équipement.",
         `location` varchar(255) DEFAULT NULL COMMENT "Lieu où se trouve l'équipement.",
         `unit` varchar(32) DEFAULT NULL COMMENT "Unité dans laquelle sera prise la mesure.",
+        `field_value_type` varchar(32) DEFAULT NULL COMMENT "Type de valeur contenu dans le champ (field) si c'est un float, entier, booléen, etc...",
         `previsionnel` tinyint DEFAULT 0 COMMENT "Equipement générique permettant la saisie de valeurs prévisionnelles pour un équipement réel.",
         `digital` tinyint DEFAULT NULL COMMENT "Si c'est un appareil digital ou analogue.",
         `rate` tinyint DEFAULT NULL COMMENT "La fréquence des mesures.",
