@@ -17,12 +17,15 @@ class InputService():
         # Les valeurs formattées.
         measurements = []
         mois_a_clean = []
+        
         # Définition du TimeZone (TODO : on pourrait le mettre dans une variable d'env ça serait plus propre)
         cet_timezone = pytz.timezone('Europe/Paris')
 
         for item in data['datablocs']:
             # Non bloquant si la clé n'existe pas.
-            month, year, value = item.get("month"), item.get("year"), item.get("value")
+            # On tente de cast en entier.
+            try: month, year, value = int(item.get("month")), int(item.get("year")), item.get("value")
+            except: return []
 
             # Si l'un des trois paramètres n'est pas renseigné.
             if None in (month, year, value): continue
@@ -38,7 +41,7 @@ class InputService():
                     'value': (value / nb_jours)
                 } for day in range(1, nb_jours)]
 
-            # Option Identique.
+            # Option Identique / Jour.
             if data['option'] == 1:
                 # Ajout des mesures pour chaque jour du mois via une liste de compréhension (plus rapide).
                 measurements += [{
@@ -62,7 +65,6 @@ class InputService():
                 date_utc = date_timezone.astimezone(pytz.utc)
                 # Convertir la date UTC au format lisible par InfluxDB
                 formatted_datetime = date_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-
 
             # Utilisé pour la purge.
             last_day = dateutils.dernier_jour_du_mois(month, year)

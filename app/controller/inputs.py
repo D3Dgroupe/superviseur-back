@@ -14,6 +14,8 @@ def ajout_donnees_mois():
 
     measurements = service.ajouter_donnees_mois(data)
 
+    if len(measurements) == 0: jsonify("Aucun point n'a pu être ajouté vers Influx."), 400
+
     # Renvoie les valeurs ajoutés au front.
     return jsonify(measurements), 200
 

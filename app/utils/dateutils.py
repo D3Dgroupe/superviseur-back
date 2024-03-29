@@ -1,6 +1,6 @@
 from datetime import datetime
 
-def dernier_jour_du_mois(month, year):
+def dernier_jour_du_mois(month: int, year: int):
     """
         La fonction prend en entrée un mois (1-12) et une année et renvoie le dernier jour du mois sous forme d'objet (datetime).
     """
