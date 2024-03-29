@@ -142,7 +142,9 @@ def purge(tag: str):
     # Initialisation du client InfluxDB.
     client = InfluxDBClient(url = url, token = token, org = org)
     delete_api = client.delete_api()
-
+    # Définition du TimeZone (TODO : on pourrait le mettre dans une variable d'env ça serait plus propre)
+    cet_timezone = pytz.timezone('Europe/Paris')
+    
     now = datetime.now()
     ten_years_ago = now - relativedelta(years = 10)
     ten_years_after = now + relativedelta(years = 10)

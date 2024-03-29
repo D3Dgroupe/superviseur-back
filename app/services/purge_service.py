@@ -21,7 +21,8 @@ class PurgeService():
     def purge_days(self, data: dict):
         # Les valeurs formattées.
         days = []
-
+        # Définition du TimeZone (TODO : on pourrait le mettre dans une variable d'env ça serait plus propre)
+        cet_timezone = pytz.timezone('Europe/Paris')
         # Traitement des données pour compatibilité Influx.
         for item in data['datablocs']:
             # Vérifie que la clé existe.
@@ -33,8 +34,8 @@ class PurgeService():
             # On converti la date récupérée en format Datetime pour pouvoir la réutiliser après
             variable_date = datetime.strptime(date, "%Y-%m-%d")
             # Début de journée et fin de journée.
-            datetime_str_debut = variable_date.replace(hour = 00, minute = 00, second = 00).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-            datetime_str_fin = variable_date.replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            datetime_str_debut = cet_timezone.localize(variable_date.replace(hour = 00, minute = 00, second = 00),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            datetime_str_fin = cet_timezone.localize(variable_date.replace(hour = 23, minute = 59, second = 59),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
             # Ajoute dans les mesures une nouvelle entrée.
             days.append({'start': datetime_str_debut, 'end': datetime_str_fin})
@@ -49,7 +50,8 @@ class PurgeService():
     def purge_months(self, data: dict):
         # Les valeurs formattées.
         months = []
-
+        # Définition du TimeZone (TODO : on pourrait le mettre dans une variable d'env ça serait plus propre)
+        cet_timezone = pytz.timezone('Europe/Paris')
         # Traitement des données pour compatibilité Influx.
         for item in data['datablocs']:
             # Non bloquant si la clé n'existe pas.
@@ -60,9 +62,8 @@ class PurgeService():
 
             # Passe par une fonction utilitaire pour le nombre de jours dans le mois de l'année spécifiée.
             last_day = dateutils.dernier_jour_du_mois(month, year)
-            last_day_utc = last_day.replace(hour = 23, minute = 59, second = 59).astimezone(pytz.utc)
-            formatted_datetime_last_day = last_day_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
-            formatted_datetime_first_day = datetime(year, month, 1).replace(hour = 00, minute = 00, second = 00).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            formatted_datetime_last_day = cet_timezone.localize(last_day.replace(hour = 23, minute = 59, second = 59),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            formatted_datetime_first_day = cet_timezone.localize(datetime(year, month, 1).replace(hour = 00, minute = 00, second = 00),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
             months.append({'start': formatted_datetime_first_day, 'end': formatted_datetime_last_day})
         
