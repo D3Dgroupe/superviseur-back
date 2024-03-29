@@ -105,7 +105,7 @@ def write(device: dict, points: dict, pool: int):
 
         # Pour chaque enregistrement.
         for data in points:
-            
+
             # Création du point.
             point = Point(device['tag'])
 
@@ -154,7 +154,7 @@ def purge_days(days: list, device: dict):
     # Initialisation du client InfluxDB.
     client = InfluxDBClient(url = url, token = token, org = org)
     delete_api = client.delete_api()
-    
+   
     # Supprime les mesures de chaque jour spécifié.
     for day in days:
         # Points de départ et de fin des mesures à supprimer.
@@ -163,6 +163,7 @@ def purge_days(days: list, device: dict):
 
         # Le tag de l'appareil.
         tag = device['tag']
+        
 
         try: delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
         except: print(Fore.RED + f"La suppression au jour des mesures du capteur avec pour tag {tag} n'a pu avoir lieu sur le bucket {bucket}."); return False
@@ -178,8 +179,9 @@ def purge_months(months: list, device: dict):
     for month in months:
         # Points de départ et de fin des mesures à supprimer.
         start = datetime.fromisoformat(month['start'].rstrip('Z'))
+        print(start)
         stop = datetime.fromisoformat(month['end'].rstrip('Z'))
-
+        print(stop)
         # Le tag de l'appareil.
         tag = device['tag']
 
