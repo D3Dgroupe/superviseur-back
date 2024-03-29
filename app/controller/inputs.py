@@ -24,7 +24,7 @@ def ajout_donnees_mois():
 def ajout_donnees_heure():
     # Les données reçues à formatter.
     data = request.get_json()
-
+    
     measurements = service.ajouter_donnees_heure(data)
 
     # Retourne le nouveau dictionnaire et le statut code (OK).
