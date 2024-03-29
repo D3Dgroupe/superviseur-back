@@ -48,6 +48,7 @@ def transmute(data: dict, pool: int, test = False):
             threshold = record["threshold"]
             unit = record["unit"]
             previsionnel = record["previsionnel"]
+            field_type = record["field_value_type"]
 
             # Groupes d'appartenance.
             group_a = record["deviceGroup"]
@@ -68,8 +69,12 @@ def transmute(data: dict, pool: int, test = False):
                 # Le seuil si applicable.
                 if threshold is not None: point.field("threshold", threshold)
                 
-                # Notre utilisé de mesure (peuvent être différents types de données).
-                point.field(unit, measurement["value"])
+                # La valeur n'est pas cast si le type est différent de float pour éviter de crash.
+                # Les booléns 1/0 peuvent néanmoins restés acceptés tels quels (le dégivreur par exemple).
+                value = measurement["value"] if field_type != 'Décimal' else float(measurement["value"])
+                
+                # Notre utilisé de mesure comme nom de champ associé à sa valeur.
+                point.field(unit, value)
                 
                 # Le point dans le temps.
                 point.time(measurement["time"])
@@ -115,6 +120,7 @@ def write(device: dict, points: dict, pool: int):
             point.tag("name_displayed", device['nameDisplayed'])
             point.tag("name_gtc", device['nameGtc'])
             point.tag("previsionnel", device['previsionnel'])
+            field_type = device["field_value_type"]
 
             # Le seuil si applicable.
             if device['threshold'] is not None: point.field("threshold", device['threshold'])
@@ -163,7 +169,6 @@ def purge_days(days: list, device: dict):
 
         # Le tag de l'appareil.
         tag = device['tag']
-        
 
         try: delete_api.delete(start = start, stop = stop, predicate = f'_measurement="{tag}"', bucket = bucket, org = org)
         except: print(Fore.RED + f"La suppression au jour des mesures du capteur avec pour tag {tag} n'a pu avoir lieu sur le bucket {bucket}."); return False
@@ -179,9 +184,8 @@ def purge_months(months: list, device: dict):
     for month in months:
         # Points de départ et de fin des mesures à supprimer.
         start = datetime.fromisoformat(month['start'].rstrip('Z'))
-        print(start)
         stop = datetime.fromisoformat(month['end'].rstrip('Z'))
-        print(stop)
+
         # Le tag de l'appareil.
         tag = device['tag']
 
