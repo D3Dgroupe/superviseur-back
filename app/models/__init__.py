@@ -12,6 +12,8 @@ def setup():
         Initialize les bases de données et leurs schémas.
     '''
     
+    # TODO : Migration.
+
     with Database() as db:
         print(Fore.YELLOW + "Création de la base de données pour AKSM.")
 

@@ -5,3 +5,4 @@ temp
 storage/*
 uploads/*
 *.csv
+test.py
