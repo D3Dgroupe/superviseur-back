@@ -120,13 +120,16 @@ def write(device: dict, points: dict, pool: int):
             point.tag("name_displayed", device['nameDisplayed'])
             point.tag("name_gtc", device['nameGtc'])
             point.tag("previsionnel", device['previsionnel'])
-            field_type = device["field_value_type"]
 
             # Le seuil si applicable.
             if device['threshold'] is not None: point.field("threshold", device['threshold'])
             
-            # Notre utilisé de mesure (peuvent être différents types de données).
-            point.field(device['unit'], data["value"])
+            # La valeur n'est pas cast si le type est différent de float pour éviter de crash.
+            # Les booléns 1/0 peuvent néanmoins restés acceptés tels quels (le dégivreur par exemple).
+            value = data["value"] if device["field_value_type"] != 'Décimal' else float(data["value"])
+            
+            # Notre utilisé de mesure comme nom de champ associé à sa valeur.
+            point.field(device['unit'], value)
             
             # Le point dans le temps.
             point.time(data["time"])
