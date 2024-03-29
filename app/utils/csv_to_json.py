@@ -13,6 +13,8 @@ import re
 import hashlib
 import time
 
+import pytz
+
 # Initialize colorama.
 colorama.init(autoreset = True)
 
@@ -23,11 +25,12 @@ def convert(file_path: str, save = False, separator: str = ','):
     # Timer start.
     start_time = time.time()
     
-    # La fusée horaire (le fuseau pardon).
-    paris_timezone = ZoneInfo("Europe/Paris")
-    
+    # Définition du TimeZone (TODO : on pourrait le mettre dans une variable d'env ça serait plus propre)  # La fusée horaire (le fuseau pardon).
+    cet_timezone = pytz.timezone('Europe/Paris')
+       
     # Charge le fichier csv et ignore les headers, on utilise le séparateur point virgule.
-    csv_data = pd.read_csv(file_path, na_values = [''], skiprows = [0], header = None, sep = separator)
+    try: csv_data = pd.read_csv(file_path, na_values = [''], skiprows = [0], header = None, sep = separator)
+    except: print(Fore.RED + f"ERROR : La fichier CSV n'est pas valide."); return None
     
     # Le nom des instruments.
     instruments = csv_data.iloc[0, 1:].values
@@ -57,11 +60,17 @@ def convert(file_path: str, save = False, separator: str = ','):
         # On sait que la première valeur est notre timestamp qu'on met au propre en le formattant et le transformant en ts conscient de son fuseau.
         local_time_str = re.sub(' +', ' ', row[0]).strip()
 
-        try:
-            local_datetime = datetime.strptime(local_time_str, "%H:%M:%S %d/%m/%Y").replace(tzinfo = paris_timezone)
-        except:
-            try: local_datetime = datetime.strptime(local_time_str, "%H:%M:%S %m/%d/%Y").replace(tzinfo = paris_timezone)
+        try: 
+            local_datetime = cet_timezone.localize(datetime.strptime(local_time_str, "%H:%M:%S %d/%m/%Y"),is_dst=None)
+        except: 
+            try: local_datetime = cet_timezone.localize(datetime.strptime(local_time_str, "%H:%M:%S %d/%m/%Y"),is_dst=None)
             except: return None
+        #Ancien code (pas sûr qu'il fonctionnait mais je crois pas car sur l'import PC GTB ça n'a pas fonctionné)  
+        #try:
+        #    local_datetime = datetime.strptime(local_time_str, "%H:%M:%S %d/%m/%Y").replace(tzinfo = paris_timezone)
+        #except:
+        #    try: local_datetime = datetime.strptime(local_time_str, "%H:%M:%S %m/%d/%Y").replace(tzinfo = paris_timezone)
+        #    except: return None
         
         # Les mesures après la première valeur.
         measurements = row[1:]
@@ -121,7 +130,8 @@ def convert(file_path: str, save = False, separator: str = ','):
             
             # Nouvelle entrée (les valeurs sont remplacées par None si elles n'existent pas dans le csv).
             measurement_entry = {
-                "time": local_datetime.astimezone(ZoneInfo("UTC")).isoformat().replace('+00:00', 'Z'),
+                # Ancien code à supprimer si fonctionnel "time": local_datetime.astimezone(ZoneInfo("UTC")).isoformat().replace('+00:00', 'Z'),
+                "time": local_datetime.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                 "value": float(measurements[j]) if not manquante else None
             }
 
