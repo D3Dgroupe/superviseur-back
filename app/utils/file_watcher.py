@@ -43,6 +43,7 @@ def start_watching_windows(folder_path, callback_function, scan_interval):
     # On initialise le set avec les fichiers qui ont déjà été traités dans le répertoire (en cas de crash par exemple).
     last_files = set(os.listdir(folder_path))
 
+
     while True:
         # Récupère les fichiers déjà présents.
         current_files = set(os.listdir(folder_path))
@@ -56,5 +57,7 @@ def start_watching_windows(folder_path, callback_function, scan_interval):
         # Met à jour la liste des derniers fichiers.
         last_files = current_files.copy()
 
+        # TODO : On zip + déplace le fichier traité ?
+        
         # Délai avant prochain tour de boucle.
         time.sleep(scan_interval)
