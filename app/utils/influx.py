@@ -126,17 +126,16 @@ def write(device: dict, points: dict, pool: int):
             
             # La valeur n'est pas cast si le type est différent de float pour éviter de crash.
             # Les booléns 1/0 peuvent néanmoins restés acceptés tels quels (le dégivreur par exemple).
-            value = data["value"] if device["field_value_type"] != 'Décimal' else float(data["value"])
-            
+            value = float(data["value"]) if device["field_value_type"] == 'Décimal' or device["field_value_type"] == 'Entier' else data["value"]
             # Notre utilisé de mesure comme nom de champ associé à sa valeur.
             point.field(device['unit'], value)
             
             # Le point dans le temps.
             point.time(data["time"])
-                
+         
             write_api.write(bucket = bucket, org = org, record = point)
             counter = counter + 1
-        
+            
         end_time = time.time()
         print(Fore.GREEN + f"{counter} nouveaux points ont été ajoutés au bucket.")
         print(Fore.LIGHTMAGENTA_EX + f"Temps de traitement du dictionnaire vers influx environ {round(end_time - start_time, 2)} secondes.")
