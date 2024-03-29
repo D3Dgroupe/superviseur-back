@@ -1,5 +1,6 @@
 # app/services/input_service.py
 from datetime import datetime
+from colorama import Fore
 import pytz
 from app.utils.influx import write, purge_months, purge_days
 from app.utils import dateutils
@@ -106,7 +107,7 @@ class InputService():
             datetime_str_debut = cet_timezone.localize(variable_date.replace(hour = 00, minute = 00, second = 00),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             datetime_str_fin = cet_timezone.localize(variable_date.replace(hour = 23, minute = 59, second = 59),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             datetime_str = datetime_str_debut if data['option'] == 0 else datetime_str_fin
-
+            
             # Ajoute dans les mesures une nouvelle entrée.
             days_a_clean.append({'start': datetime_str_debut, 'end': datetime_str_fin})
             
@@ -140,11 +141,13 @@ class InputService():
             # On converti la date récupérée en format Datetime pour pouvoir la réutiliser après
             variable_date = datetime.strptime(date, "%Y-%m-%d")
             variable_time = datetime.strptime(time, "%H:%M")
-            datetime_str = cet_timezone.localize(variable_date.replace(hour = variable_time.hour, minute = variable_time.minute, second = 00),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            try:
+                datetime_str = cet_timezone.localize(variable_date.replace(hour = variable_time.hour, minute = variable_time.minute, second = 00),is_dst=None).astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                # Ajoute dans les mesures une nouvelle entrée.
+                measurements.append({ 'time': datetime_str, 'value': value })
+            except:
+                print(Fore.RED + f"ERROR : La date n'est pas valide : " + str(variable_date))
 
-            # Ajoute dans les mesures une nouvelle entrée.
-            measurements.append({ 'time': datetime_str, 'value': value })
-        
         # On préfère ne pas altérer le dictionnaire original.
         new_data = dict(data)
         new_data.update({'measurements': measurements})
